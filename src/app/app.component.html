@@ -78,9 +78,18 @@
 
   }
 </div>
+} @else {
+  <div class="menu flex align-content-center">
+    <div class="flex align-items-center">
+      <span>Error: Receiving no data from VR System...</span>
+    </div>
+  </div>
+}
 
-<div class="log flex">
-  <div class="logblock">
+<div class="log flex align-content-center gap-3 justify-content-left">
+
+@if (last_status != undefined) {
+  <div class="flex logblock">
     Time: {{last_status.time.toFixed(2) }}<br />
     Stimulus: {{last_status.stimulus_name }}<br />
     Stimulus Time: {{last_status.stimulus_time.toFixed(2) }}<br />
@@ -88,23 +97,9 @@
     Experiment State: {{last_status.experiment_state }}<br />
     Write Log: {{last_status.write_log }}<br />
     Write Audio: {{last_status.write_audio }}<br />
-  </div>
 
-  <div class="logblock">
-    HEAD.X: {{last_status.participant_head_transform[0].toFixed(2) }}<br />
-    HEAD.Y: {{last_status.participant_head_transform[1].toFixed(2) }}<br />
-    HEAD.Z: {{last_status.participant_head_transform[2].toFixed(2) }}<br />
+    <br />
 
-    LEFT.X: {{last_status.participant_lefthand_transform[0].toFixed(2) }}<br />
-    LEFT.Y: {{last_status.participant_lefthand_transform[1].toFixed(2) }}<br />
-    LEFT.Z: {{last_status.participant_lefthand_transform[2].toFixed(2) }}<br />
-
-    RIGHT.X: {{last_status.participant_righthand_transform[0].toFixed(2) }}<br />
-    RIGHT.Y: {{last_status.participant_righthand_transform[1].toFixed(2) }}<br />
-    RIGHT.Z: {{last_status.participant_righthand_transform[2].toFixed(2) }}<br />
-  </div>
-
-  <div class="logblock">
     ROBOT.X: {{last_status.robot_transform[0].toFixed(2) }}<br />
     ROBOT.Y: {{last_status.robot_transform[1].toFixed(2) }}<br />
     ROBOT.Z: {{last_status.robot_transform[2].toFixed(2) }}<br />
@@ -113,7 +108,22 @@
     RETURN.Y: {{last_status.return_transform[1].toFixed(2) }}<br />
     RETURN.Z: {{last_status.return_transform[2].toFixed(2) }}<br />
   </div>
-  <div class="logblock">
+
+  <div class="flex logblock">
+    HEAD.X: {{last_status.participant_head_transform[0].toFixed(2) }}<br />
+    HEAD.Y: {{last_status.participant_head_transform[1].toFixed(2) }}<br />
+    HEAD.Z: {{last_status.participant_head_transform[2].toFixed(2) }}<br />
+    <br />
+    LEFT.X: {{last_status.participant_lefthand_transform[0].toFixed(2) }}<br />
+    LEFT.Y: {{last_status.participant_lefthand_transform[1].toFixed(2) }}<br />
+    LEFT.Z: {{last_status.participant_lefthand_transform[2].toFixed(2) }}<br />
+    <br />
+    RIGHT.X: {{last_status.participant_righthand_transform[0].toFixed(2) }}<br />
+    RIGHT.Y: {{last_status.participant_righthand_transform[1].toFixed(2) }}<br />
+    RIGHT.Z: {{last_status.participant_righthand_transform[2].toFixed(2) }}<br />
+  </div>
+
+  <div class="flex logblock">
     FLOOR.X: {{last_status.participant_xyz_yaw[0].toFixed(2) }}<br />
     FLOOR.Y: {{last_status.participant_xyz_yaw[1].toFixed(2) }}<br />
     FLOOR.Z: {{last_status.participant_xyz_yaw[2].toFixed(2) }}<br />
@@ -126,15 +136,17 @@
     Actor2.Angle: {{last_status.participant_actor2_angledist[0].toFixed(2) }}<br />
     Actor2.Dist: {{last_status.participant_actor2_angledist[1].toFixed(2) }}<br />
   </div>
-</div>
 } @else {
-<div class="menu flex align-content-center">
-  <div class="flex align-items-center">
-    <span>Error: Receiving no data from VR System...</span>
+  <div class="flex logblock">
+    ERROR: NO DATA
   </div>
-</div>
 
 }
+  <div class="flex flex-grow-1"></div>
+  <div class="flex logblock canvas">
+    <canvas id="canvas-box"></canvas>
+  </div>
+</div>
 
 
 <router-outlet />

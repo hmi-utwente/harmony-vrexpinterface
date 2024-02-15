@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ExpdeviceService } from './services/expdevice.service';
 import { ButtonModule } from 'primeng/button';
 import { Parser } from 'binary-parser';
+import * as THREE from 'three';
 
 interface StimulusSpec {
   name: string;
@@ -20,11 +21,18 @@ interface StimulusSpec {
   styleUrl: './app.component.css'
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'experiment_interface';
 
   last_status : any | undefined = undefined;
   stimulus_spec : StimulusSpec[] = [];  //{ [id: string] : any; } = {};
+
+  circle? : THREE.Mesh;
+  box? : THREE.Mesh;
+
+  renderer? : THREE.WebGLRenderer;
+  scene? : THREE.Scene;
+  camera? : THREE.Camera;
 
   trackStimulusSpec(index: number, spec: StimulusSpec) {
     return spec.name;
@@ -95,9 +103,81 @@ export class AppComponent {
     eds.status.subscribe(msg => {
       var arr =Uint8Array.from(atob(msg), c => c.charCodeAt(0));
       this.last_status = this.parseStatusV0.parse(arr);
+
+
+      if (this.renderer && this.scene && this.camera && this.circle) {
+        this.circle.position.set(
+          this.last_status.participant_xyz_yaw[0],
+          this.last_status.participant_xyz_yaw[2],
+          0);
+        this.renderer.render(this.scene, this.camera);
+
+      }
     });
 
     eds.send_device("sendstimuli");
+  }
+  ngOnInit(): void {
+    this.createThreeJsBox();
+  }
+
+  createThreeJsBox(): void {
+    const canvas = document.getElementById('canvas-box');
+    this.scene = new THREE.Scene();
+
+    const mBox = new THREE.MeshBasicMaterial({ color: "#a2ad9c" });
+    const mUser = new THREE.MeshBasicMaterial({ color: "#e85325" });
+
+
+    this.box = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5, 4, 0.1), 
+      mBox
+   );
+
+    this.circle = new THREE.Mesh(
+      new THREE.CircleGeometry( 0.15 , 32 ),
+      mUser
+   );
+
+   this.scene.add(this.circle, this.box);
+   this.box.position.set(0, 1.5, -0.06);
+   this.circle.position.set(0, 0, 0);
+
+  const canvasSizes = {
+    width: 150,
+    height: 200,
+   };
+
+  const orthoScale = 70;
+  this.camera = new THREE.OrthographicCamera(
+    canvasSizes.width / - orthoScale,
+    canvasSizes.width / orthoScale,
+    canvasSizes.height / orthoScale,
+    canvasSizes.height / - orthoScale,
+  1, 20);
+
+   /*
+   const camera = new THREE.PerspectiveCamera(
+    75,
+    canvasSizes.width / canvasSizes.height,
+    0.001,
+    1000
+   );
+   */
+   this.camera.position.y = 1.65;
+   this.camera.position.z = 10;
+   this.scene.add(this.camera);
+
+   if (!canvas) {
+    return;
+   }
+
+   this.renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+   });
+   this.renderer.setClearColor(0x111111, 1);
+   this.renderer.setSize(canvasSizes.width, canvasSizes.height);
+   this.renderer.render(this.scene, this.camera);
   }
 
   refreshStimuli() {
