@@ -1,27 +1,42 @@
 # ExperimentInterface
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.1.3.
+A webinterface for managing Harmonny VR Experiments
 
-## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Requirements / First setup
+Install nodejs (version 20).
+Make sure that we have the right angular client version:
+```
+npm install -g @angular/cli@17.1.3
+```
 
-## Code scaffolding
+Then, from inside this project folder, run this command to install all dependencies:
+```
+npm install
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Build the interface:
+```
+ng build
+```
 
-## Build
+## Run the interface webserver & Configure Headset
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run the following command to start the webserver with the webinterface.
+It runs on [http://localhost:4444](http://localhost:4444). It listens for udp messages from the headset on port 7766.
 
-## Running unit tests
+```
+node server.js
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Configure the headset target host and port to the IP address of the computer this web interface is running on.
 
-## Running end-to-end tests
+## Fetch an update
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+To get the latest version from git, just stop the server, git pull, rebuild and restart:
 
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```
+git pull
+ng build
+node server.js
+```
