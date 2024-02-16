@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
   stimulus_spec : StimulusSpec[] = [];  //{ [id: string] : any; } = {};
 
   circle? : THREE.Mesh;
+  circleR? : THREE.Mesh;
   box? : THREE.Mesh;
 
   renderer? : THREE.WebGLRenderer;
@@ -110,6 +111,7 @@ export class AppComponent implements OnInit {
           this.last_status.participant_xyz_yaw[0],
           this.last_status.participant_xyz_yaw[2],
           0);
+        this.circle.setRotationFromAxisAngle(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-this.last_status.participant_xyz_yaw[3]-30));
         this.renderer.render(this.scene, this.camera);
 
       }
@@ -127,25 +129,32 @@ export class AppComponent implements OnInit {
 
     const mBox = new THREE.MeshBasicMaterial({ color: "#a2ad9c" });
     const mUser = new THREE.MeshBasicMaterial({ color: "#e85325" });
+    const mRobot = new THREE.MeshBasicMaterial({ color: "#0ee6e2" });
 
 
-    this.box = new THREE.Mesh(
+   this.box = new THREE.Mesh(
       new THREE.BoxGeometry(1.5, 4, 0.1), 
       mBox
    );
 
-    this.circle = new THREE.Mesh(
-      new THREE.CircleGeometry( 0.15 , 32 ),
+   this.circle = new THREE.Mesh(
+      new THREE.CircleGeometry( 0.2 , 3 ),
       mUser
    );
 
-   this.scene.add(this.circle, this.box);
+   this.circleR = new THREE.Mesh(
+      new THREE.CircleGeometry( 0.15 , 24 ),
+      mRobot
+   );
+
+   this.scene.add(this.circle, this.circleR, this.box);
    this.box.position.set(0, 1.5, -0.06);
    this.circle.position.set(0, 0, 0);
+   this.circleR.position.set(0, 30, 0); // Not shown
 
   const canvasSizes = {
     width: 150,
-    height: 200,
+    height: 200
    };
 
   const orthoScale = 70;
@@ -174,6 +183,7 @@ export class AppComponent implements OnInit {
 
    this.renderer = new THREE.WebGLRenderer({
     canvas: canvas,
+    antialias: true
    });
    this.renderer.setClearColor(0x111111, 1);
    this.renderer.setSize(canvasSizes.width, canvasSizes.height);
