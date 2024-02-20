@@ -1,3 +1,4 @@
+
 @if (last_status != undefined) {
 <div class="menu flex align-content-center">
   <p-button class="flex align-items-center" severity="danger" icon="pi pi-user-plus" [disabled]="!(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="nextParticipant()"></p-button>
@@ -19,6 +20,7 @@
   <div class="flex align-items-center">
     <div class="flex align-items-center justify-content-center recindicator {{ last_status.write_audio == 1 ? 'rec' : '' }}"><span>MIC</span></div>
   </div>
+  <p-toggleButton class="flex align-items-center m-l-3" size="small" [(ngModel)]="showHidden" onIcon="pi pi-file-edit" offIcon="pi pi-file-edit"></p-toggleButton>
   <p-button class="flex align-items-center" icon="pi pi-refresh" (onClick)="refreshStimuli()"></p-button>
 </div>
 <div class="menu flex align-content-center">
@@ -67,15 +69,21 @@
 
 <div class="stimuli flex flex-wrap gap-3 justify-content-left">
   @for (stimulus of stimulus_spec; track trackStimulusSpec) {
-    <div class="stimulus {{ last_status.stimulus_name == stimulus.name ? 'currentstimulus' : '' }}">
-      <div class="flex align-content-center">
-        <h3 class="flex align-items-center">{{stimulus.name}}</h3>
-        <div class="flex flex-grow-1"></div>
-        <p-button class="flex align-items-center" icon="pi pi-file-import" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="readyStimulus(stimulus.name)"></p-button>
-      </div>
-      <div class="instructions">{{stimulus.instructions}}</div>
-    </div>
+    @if (last_status.stimulus_name == stimulus.name|| showHidden || !stimulusHidden(stimulus.name)) {
+      <div class="stimulus {{stimulusHidden(stimulus.name) ? 'hiddenstimulus' : '' }} {{ last_status.stimulus_name == stimulus.name ? 'currentstimulus' : '' }}">
+        <div class="flex align-content-center">
+          <h3 class="flex align-items-center">{{stimulus.name}}</h3>
+          <div class="flex flex-grow-1"></div>
 
+          @if (showHidden) {
+            <p-toggleButton size="small" class="m-1" [ngModel]="stimulusHidden(stimulus.name)" (onChange)="setHidden(stimulus.name, $event)" onIcon="pi pi-eye-slash" offIcon="pi pi-eye"></p-toggleButton>
+            <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-edit" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="editStimulus(stimulus.name, stimulus.instructions)"></p-button>
+          }
+          <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-import" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="readyStimulus(stimulus.name)"></p-button>
+        </div>
+        <div class="instructions">{{stimulus.instructions}}</div>
+      </div>
+    }
   }
 </div>
 } @else {
@@ -140,7 +148,6 @@
   <div class="flex logblock">
     ERROR: NO DATA
   </div>
-
 }
   <div class="flex flex-grow-1"></div>
   <div class="flex logblock canvas">
@@ -148,5 +155,11 @@
   </div>
 </div>
 
+<app-postscreenspec (readSpecEvent)="readSpecEvent($event)" (writeSpecEvent)="writeSpecEvent($event)" (setSpecEvent)="setSpecEvent($event)" [(spec)]="screenspec" [id]="screenspecid"></app-postscreenspec>
+
+<p-dialog header="Editing Description for {{editingStimulusName}}" [(visible)]="editingStimulus" [style]="{width: '700px'}">
+  <textarea rows="5" cols="80" pInputTextarea [(ngModel)]="editingStimulusInstructions"></textarea> <br />
+  <p-button severity="danger" label="Save Instructions" class="m-1" size="small" icon="pi pi-save" (onClick)="saveChangedStimulusInstructions()"></p-button>
+</p-dialog>
 
 <router-outlet />

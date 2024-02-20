@@ -51,7 +51,6 @@ server.on('listening',function(){
   var address = server.address();
   var port = address.port;
   var ipaddr = address.address;
-  console.log('Server listening: ' + ipaddr + ':' + port );
 });
 
 //emits after the socket is closed using socket.close();
@@ -82,10 +81,7 @@ setInterval(function() {
 
 
 io.on("connection", socket => {
-    console.log("socket connected..");
-
     socket.on("command", data => {
-        console.log(data);
         sendQuest(data);
     });
 });
@@ -102,5 +98,5 @@ io.on("connection", socket => {
 
 
 http.listen(4444, '0.0.0.0', () => {
-  console.log('Listening on port 4444');
+  console.log('Web Inteface running: http://127.0.0.1:' + port );
 });

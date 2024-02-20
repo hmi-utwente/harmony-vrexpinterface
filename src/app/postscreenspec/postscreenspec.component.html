@@ -1,0 +1,20 @@
+
+<div class="menu flex align-items-center">
+    <div class="flex align-items-center">
+        <h3 class="flex align-items-center">EDIT SCREEN SLOTS</h3>
+    </div>
+    <div class="flex flex-grow-1"></div>
+    <p-inputNumber class="m-1" [size]="1" [(ngModel)]="id" [showButtons]="true" buttonLayout="horizontal" inputId="horizontal" spinnerMode="horizontal" [step]="1" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"></p-inputNumber>
+    <p-button class="m-1" severity="primary" icon="pi pi-download" label="Read" (onClick)="readSpecEvent.emit(id)"></p-button>
+    <p-button class="m-1" severity="success" icon="pi pi-star" label="Set" (onClick)="setSpecEvent.emit(id)"></p-button>
+    <p-button class="m-1" severity="danger" icon="pi pi-upload" label="Write" (onClick)="writeSpecEvent.emit(id)"></p-button>
+</div>
+<div class="postscreenspec">
+    @for (screen of model.screens; track screen; let index = $index) {
+        <app-postscreen (screenChange)="rebuildSpec()" [screen]="model.screens[index]"></app-postscreen>
+        <div>
+            <p-button class="m-1" severity="danger" icon="pi pi-trash" label="Remove Screen" (onClick)="removeScreen(index)"></p-button>
+            <p-button class="m-1" severity="primary" icon="pi pi-plus-circle" label="Add Screen" (onClick)="addScreen(index)"></p-button>
+        </div>
+    }
+</div>

@@ -16,6 +16,8 @@ export class ExpdeviceService extends Socket {
   message = this.fromEvent<string>('devicemsg');
   stimulusspec = this.fromEvent<string>('stimulusspec');
   status = this.fromEvent<string>('devicestatus');
+  
+  screenspec = this.fromEvent<string>('screenspec');
 
   constructor() {
     console.log("init socketio");

@@ -1,0 +1,44 @@
+<div class="postscreen {{ editing ? 'editing' : ''}}">
+@if (editing) {
+    <div class="flex align-items-center">
+        <div class="flex align-items-center">
+            <input style="width: 100%" type="text" pInputText [(ngModel)]="_screen.title" />
+        </div>
+        <div class="flex-grow-1"></div>
+        <p-button class="m-1" severity="success" icon="pi pi-save" (onClick)="saveEdit()" size="small"></p-button>
+    </div>
+    <div class="p-1" >
+        <h4>Body:</h4>
+        <input style="width: 100%" type="text" pInputText [(ngModel)]="_screen.body" />
+    </div>
+    <div class="p-1">
+        <h4>Responses:</h4>
+    @for (response of _screen.responses; track response; let index = $index) {
+        <div class="flex align-items-center">
+            <div class="flex-grow-1"></div>
+            <input type="text" pInputText [(ngModel)]="_screen.responses[index]" />
+            <p-button severity="danger" class="m-1" size="small" icon="pi pi-trash" (onClick)="removeResponse(index)"></p-button>
+        </div>
+    }
+    </div>
+    <div class="flex align-items-center p-1">
+        <div class="flex-grow-1"></div>
+        <p-button class="flex m-1" severity="primary" icon="pi pi-plus-circle" size="small" (onClick)="addResponse()"></p-button>
+    </div>
+} @else {
+    <div class="flex align-items-center">
+        <h4 class="flex postscreentitle">{{_screen.title}}</h4>
+        <div class="flex flex-grow-1"></div>
+        <p-button class="flex m-1" severity="primary" icon="pi pi-file-edit" size="small" (onClick)="startEdit()"></p-button>
+    </div>
+    <p class="postscreenbody">{{_screen.body}}</p>
+    <div class="postscreenresponses">
+    <ul>
+    @for (response of _screen.responses; track response) {
+        <li>{{response}}</li>
+    }
+    </ul>
+    </div>
+
+}
+</div>

@@ -4,6 +4,11 @@ import { ExpdeviceService } from './services/expdevice.service';
 import { ButtonModule } from 'primeng/button';
 import { Parser } from 'binary-parser';
 import * as THREE from 'three';
+import { DialogModule } from 'primeng/dialog';
+import { FormsModule } from '@angular/forms';
+import { PostScreenSpecComponent } from './postscreenspec/postscreenspec.component';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { ToggleButtonChangeEvent, ToggleButtonModule } from 'primeng/togglebutton';
 
 interface StimulusSpec {
   name: string;
@@ -14,12 +19,18 @@ interface StimulusSpec {
   selector: 'app-root',
   standalone: true,
   imports: [
+    FormsModule,
     RouterOutlet,
-    ButtonModule
+    ButtonModule,
+    ToggleButtonModule,
+    PostScreenSpecComponent,
+    InputTextareaModule,
+    DialogModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
+
 
 export class AppComponent implements OnInit {
   title = 'experiment_interface';
@@ -34,6 +45,27 @@ export class AppComponent implements OnInit {
   renderer? : THREE.WebGLRenderer;
   scene? : THREE.Scene;
   camera? : THREE.Camera;
+
+  screenspec : string = "";
+  screenspecid : number = 0;
+
+  hiddenStimuli : string[] = [];
+
+  showHidden : boolean = false;
+
+  JSON:any=JSON;
+
+  readSpecEvent(specId : number) {
+    this.eds.send_device("readscreenspec\t"+specId);
+  }
+
+  setSpecEvent(specId : number) {
+    this.eds.send_device("setdefaultscreenspec\t"+specId);
+  }
+
+  writeSpecEvent(specId : number) {
+    this.eds.send_device("setscreenspec\t"+specId+"\t"+this.screenspec);
+  }
 
   trackStimulusSpec(index: number, spec: StimulusSpec) {
     return spec.name;
@@ -87,22 +119,71 @@ export class AppComponent implements OnInit {
       length: 2
     })
 
+  loadHiddenStimuli() {
+    let _hidden = localStorage.getItem("hiddenStimuli");
+    if (_hidden) {
+      this.hiddenStimuli = JSON.parse(_hidden);
+    }
+  }
 
+  storeHiddenStimuli() {
+    localStorage.setItem("hiddenStimuli", JSON.stringify(this.hiddenStimuli));
+  }
+
+  stimulusHidden(name : string) : boolean {
+    let idx = this.hiddenStimuli.indexOf(name);
+    return idx >= 0;
+  }
+
+  setHidden(name : string, value : ToggleButtonChangeEvent) {
+    if (value.checked) {
+      this.hideStimulus(name);
+    } else {
+      this.unhideStimulus(name);
+    }
+    console.log(name, value);
+
+  }
+
+  hideStimulus(name : string) {
+    if (!this.stimulusHidden(name)) {
+      this.hiddenStimuli.push(name);
+      this.storeHiddenStimuli();
+    }
+  }
+
+  unhideStimulus(name : string) {
+    let idx = this.hiddenStimuli.indexOf(name);
+    if (idx >= 0) {
+      this.hiddenStimuli.splice(idx, 1);
+      this.storeHiddenStimuli();
+    }
+  }
 
   constructor(private eds: ExpdeviceService) {
     eds.connect();
     eds.message.subscribe(msg => {
       console.log(msg);
     });
+    eds.screenspec.subscribe(msg => {
+      //let els = msg.split("\t");
+      this.screenspec = msg.substring(msg.indexOf('\t') + 1);
+    })
     eds.stimulusspec.subscribe(msg => {
-      var els = msg.split("\t");
-      this.stimulus_spec.push({
-        name: els[0],
-        instructions: els[1]
-      });
+      let els = msg.split("\t");
+      let obj = {
+          name: els[0],
+          instructions: els[1]
+      };
+      let idx = this.stimulus_spec.findIndex(spec => spec.name == obj.name);
+      if (idx >= 0) {
+        this.stimulus_spec[idx] = obj;
+      } else {
+        this.stimulus_spec.push(obj);
+      }
     });
     eds.status.subscribe(msg => {
-      var arr =Uint8Array.from(atob(msg), c => c.charCodeAt(0));
+      let arr =Uint8Array.from(atob(msg), c => c.charCodeAt(0));
       this.last_status = this.parseStatusV0.parse(arr);
 
 
@@ -118,6 +199,7 @@ export class AppComponent implements OnInit {
     });
 
     eds.send_device("sendstimuli");
+    this.loadHiddenStimuli();
   }
   ngOnInit(): void {
     this.createThreeJsBox();
@@ -214,6 +296,32 @@ export class AppComponent implements OnInit {
   nextParticipant() {
     console.log("next pid");
     this.eds.send_device("nextparticipant");
+  }
+
+  editingStimulus : boolean = false;
+  editingStimulusName : string | null = null;
+  editingStimulusInstructions : string | null = null;
+
+  editStimulus(name : string, instr : string) {
+    this.editingStimulus = true; 
+    this.editingStimulusName = name;
+    this.editingStimulusInstructions = instr;
+  }
+
+  
+  /*
+  stopEditingStimulus() {
+    this.editingStimulusName = null;
+  }
+  */
+
+  saveChangedStimulusInstructions() {
+    if (this.editingStimulus && this.editingStimulusInstructions != null && this.editingStimulusName != null) {
+      this.eds.send_device("setinstructions\t"+this.editingStimulusName+"\t"+this.editingStimulusInstructions);
+      this.editingStimulus = false;
+      this.editingStimulusName = null;
+      this.editingStimulusInstructions = null;
+    }
   }
 
 }
