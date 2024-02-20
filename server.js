@@ -98,5 +98,5 @@ io.on("connection", socket => {
 
 
 http.listen(4444, '0.0.0.0', () => {
-  console.log('Web Inteface running: http://127.0.0.1:' + port );
+  console.log('Web Inteface running: http://127.0.0.1:4444');
 });
