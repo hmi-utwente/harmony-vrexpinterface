@@ -72,12 +72,12 @@
     @if (last_status.stimulus_name == stimulus.name|| showHidden || !stimulusHidden(stimulus.name)) {
       <div class="stimulus {{stimulusHidden(stimulus.name) ? 'hiddenstimulus' : '' }} {{ last_status.stimulus_name == stimulus.name ? 'currentstimulus' : '' }}">
         <div class="flex align-content-center">
-          <h3 class="flex align-items-center">{{stimulus.name}}</h3>
+          <h3 class="flex align-items-center">{{stimulus.name}} ({{stimulus.timeScale.toFixed(2)}}x)</h3>
           <div class="flex flex-grow-1"></div>
 
           @if (showHidden) {
             <p-toggleButton size="small" class="m-1" [ngModel]="stimulusHidden(stimulus.name)" (onChange)="setHidden(stimulus.name, $event)" onIcon="pi pi-eye-slash" offIcon="pi pi-eye"></p-toggleButton>
-            <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-edit" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="editStimulus(stimulus.name, stimulus.instructions)"></p-button>
+            <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-edit" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="editStimulus(stimulus.name, stimulus.timeScale, stimulus.instructions)"></p-button>
           }
           <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-import" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="readyStimulus(stimulus.name)"></p-button>
         </div>
@@ -99,12 +99,7 @@
 @if (last_status != undefined) {
   <div class="flex logblock">
     Time: {{last_status.time.toFixed(2) }}<br />
-    Stimulus: {{last_status.stimulus_name }}<br />
-    Stimulus Time: {{last_status.stimulus_time.toFixed(2) }}<br />
-    FPS: {{last_status.fps.toFixed(2) }}<br />
-    Experiment State: {{last_status.experiment_state }}<br />
-    Write Log: {{last_status.write_log }}<br />
-    Write Audio: {{last_status.write_audio }}<br />
+    TimeScale: {{last_status.timescale.toFixed(2) }}<br />
 
     <br />
 
@@ -155,10 +150,32 @@
   </div>
 </div>
 
+<div class="menu flex align-items-center">
+    <div class="flex align-items-center">
+        <h3 class="flex align-items-center">EDIT GLOBAL SETTINGS</h3>
+    </div>
+    <div class="flex flex-grow-1"></div>
+    @if (last_status != null) {
+    <div class="field">
+      <span class="fieldtitle">TimeScale:</span><br />
+      <span class="fieldvalue">{{last_status.timescale.toFixed(2)}}</span>
+    </div>
+    }
+    <p-inputNumber class="m-1" [size]="1" [(ngModel)]="timeScaleSetting" [showButtons]="true" buttonLayout="horizontal" inputId="horizontal" spinnerMode="horizontal" [step]="0.1" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"></p-inputNumber>
+    <p-button class="m-1" severity="primary" icon="pi pi-clock" label="Set" (onClick)="setTimeScale(timeScaleSetting)"></p-button>
+</div>
+
 <app-postscreenspec (readSpecEvent)="readSpecEvent($event)" (writeSpecEvent)="writeSpecEvent($event)" (setSpecEvent)="setSpecEvent($event)" [(spec)]="screenspec" [id]="screenspecid"></app-postscreenspec>
 
 <p-dialog header="Editing Description for {{editingStimulusName}}" [(visible)]="editingStimulus" [style]="{width: '700px'}">
   <textarea rows="5" cols="80" pInputTextarea [(ngModel)]="editingStimulusInstructions"></textarea> <br />
+  @if (editingStimulusTimeScale) {
+    <div class="field">
+      <span class="fieldtitle">TimeScale:</span><br />
+      <span class="fieldvalue">{{editingStimulusTimeScale.toFixed(2)}}</span>
+    </div>
+    <p-inputNumber class="m-1" [size]="1" [(ngModel)]="editingStimulusTimeScale" [showButtons]="true" buttonLayout="horizontal" inputId="horizontal" spinnerMode="horizontal" [step]="0.1" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"></p-inputNumber><br />
+  }
   <p-button severity="danger" label="Save Instructions" class="m-1" size="small" icon="pi pi-save" (onClick)="saveChangedStimulusInstructions()"></p-button>
 </p-dialog>
 

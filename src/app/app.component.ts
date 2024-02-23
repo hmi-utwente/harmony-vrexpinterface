@@ -9,9 +9,11 @@ import { FormsModule } from '@angular/forms';
 import { PostScreenSpecComponent } from './postscreenspec/postscreenspec.component';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToggleButtonChangeEvent, ToggleButtonModule } from 'primeng/togglebutton';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 interface StimulusSpec {
   name: string;
+  timeScale: number;
   instructions: string;
 }
 
@@ -25,6 +27,7 @@ interface StimulusSpec {
     ToggleButtonModule,
     PostScreenSpecComponent,
     InputTextareaModule,
+    InputNumberModule,
     DialogModule
   ],
   templateUrl: './app.component.html',
@@ -53,7 +56,17 @@ export class AppComponent implements OnInit {
 
   showHidden : boolean = false;
 
+  timeScaleSetting : number = 1.0;
+
   JSON:any=JSON;
+
+  setTimeScale(value : number, stimulus? : string) {
+    if (stimulus) {
+      this.eds.send_device("settimescale\t"+value.toFixed(2)+"\t"+stimulus);
+    } else {
+      this.eds.send_device("settimescale\t"+value.toFixed(2));
+    }
+  }
 
   readSpecEvent(specId : number) {
     this.eds.send_device("readscreenspec\t"+specId);
@@ -75,6 +88,7 @@ export class AppComponent implements OnInit {
     .int8("ver")
     .int32("PID")
     .floatle("time")
+    .floatle("timescale")
     .string("stimulus_name", { length: 32, stripNull: true })
     .floatle("stimulus_time")
     .string("experiment_state", { length: 32, stripNull: true })
@@ -173,7 +187,8 @@ export class AppComponent implements OnInit {
       let els = msg.split("\t");
       let obj = {
           name: els[0],
-          instructions: els[1]
+          timeScale: parseFloat(els[1]),
+          instructions: els[2]
       };
       let idx = this.stimulus_spec.findIndex(spec => spec.name == obj.name);
       if (idx >= 0) {
@@ -300,11 +315,13 @@ export class AppComponent implements OnInit {
 
   editingStimulus : boolean = false;
   editingStimulusName : string | null = null;
+  editingStimulusTimeScale : number | null = null;
   editingStimulusInstructions : string | null = null;
 
-  editStimulus(name : string, instr : string) {
+  editStimulus(name : string, ts: number, instr : string) {
     this.editingStimulus = true; 
     this.editingStimulusName = name;
+    this.editingStimulusTimeScale = ts;
     this.editingStimulusInstructions = instr;
   }
 
@@ -317,10 +334,14 @@ export class AppComponent implements OnInit {
 
   saveChangedStimulusInstructions() {
     if (this.editingStimulus && this.editingStimulusInstructions != null && this.editingStimulusName != null) {
+      if (this.editingStimulusTimeScale != null && this.editingStimulusTimeScale >= 0.1 && this.editingStimulusTimeScale <= 2.0) {
+        this.setTimeScale(this.editingStimulusTimeScale, this.editingStimulusName);
+      }
       this.eds.send_device("setinstructions\t"+this.editingStimulusName+"\t"+this.editingStimulusInstructions);
       this.editingStimulus = false;
       this.editingStimulusName = null;
       this.editingStimulusInstructions = null;
+
     }
   }
 
