@@ -77,9 +77,11 @@
 
           @if (showHidden) {
             <p-toggleButton size="small" class="m-1" [ngModel]="stimulusHidden(stimulus.name)" (onChange)="setHidden(stimulus.name, $event)" onIcon="pi pi-eye-slash" offIcon="pi pi-eye"></p-toggleButton>
-            <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-edit" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="editStimulus(stimulus.name, stimulus.timeScale, stimulus.instructions)"></p-button>
+            <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-edit" (onClick)="editStimulus(stimulus.name, stimulus.timeScale, stimulus.instructions)"></p-button>
+            <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-import" (onClick)="readyStimulus(stimulus.name)"></p-button>
+          } @else {
+           <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-import" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="readyStimulus(stimulus.name)"></p-button>
           }
-          <p-button size="small" class="m-1 flex align-items-center" icon="pi pi-file-import" [disabled]="last_status.stimulus_name == stimulus.name || !(last_status.experiment_state == 'STIMULUS_COMPLETED' || last_status.experiment_state == 'RESET_POSITION' || last_status.experiment_state == 'STIMULUS_READY' || last_status.experiment_state == 'INIT')" (onClick)="readyStimulus(stimulus.name)"></p-button>
         </div>
         <div class="instructions">{{stimulus.instructions}}</div>
       </div>
