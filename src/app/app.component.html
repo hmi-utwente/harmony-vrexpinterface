@@ -12,6 +12,9 @@
   </div>
   <div class="flex flex-grow-1"></div>
   <div class="flex align-items-center">
+    <div class="flex align-items-center justify-content-center fpscounter"><span>RS: {{last_status.robot_speed.toFixed(2)}}</span></div>
+  </div>
+  <div class="flex align-items-center">
     <div class="flex align-items-center justify-content-center fpscounter"><span>FPS: {{last_status.fps.toFixed(2)}}</span></div>
   </div>
   <div class="flex align-items-center">
@@ -136,10 +139,20 @@
     <br />
     Robot.Angle: {{last_status.participant_robot_angledist[0].toFixed(2) }}<br />
     Robot.Dist: {{last_status.participant_robot_angledist[1].toFixed(2) }}<br />
-    Actor1.Angle: {{last_status.participant_actor1_angledist[0].toFixed(2) }}<br />
-    Actor1.Dist: {{last_status.participant_actor1_angledist[1].toFixed(2) }}<br />
-    Actor2.Angle: {{last_status.participant_actor2_angledist[0].toFixed(2) }}<br />
-    Actor2.Dist: {{last_status.participant_actor2_angledist[1].toFixed(2) }}<br />
+    <br />
+    
+    @if (last_status.actor1_active == 1) {
+      Actor 1 (F):<br/>
+      Angle: {{last_status.participant_actor1_angledist[0].toFixed(2) }}<br />
+      Dist: {{last_status.participant_actor1_angledist[1].toFixed(2) }}<br />
+    }
+
+    @if (last_status.actor2_active == 1) {
+      Actor 2 (M):<br/>
+      Angle: {{last_status.participant_actor2_angledist[0].toFixed(2) }}<br />
+      Dist: {{last_status.participant_actor2_angledist[1].toFixed(2) }}<br />
+    }
+
   </div>
 } @else {
   <div class="flex logblock">

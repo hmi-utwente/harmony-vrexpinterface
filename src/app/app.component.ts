@@ -43,6 +43,8 @@ export class AppComponent implements OnInit {
 
   circle? : THREE.Mesh;
   circleR? : THREE.Mesh;
+  circleA1? : THREE.Mesh;
+  circleA2? : THREE.Mesh;
   box? : THREE.Mesh;
 
   renderer? : THREE.WebGLRenderer;
@@ -94,6 +96,7 @@ export class AppComponent implements OnInit {
     .string("experiment_state", { length: 32, stripNull: true })
     .int32("replay_counter")
     .floatle("fps")
+    .floatle("robot_speed")
     .uint8("write_log")
     .uint8("write_audio")
     .array("participant_head_transform", {
@@ -108,14 +111,43 @@ export class AppComponent implements OnInit {
       type: "floatle",
       length: 7
     })
-    .array("robot_transform", {
-      type: "floatle",
-      length: 7
-    })
     .array("return_transform", {
       type: "floatle",
       length: 7
     })
+    
+    .uint8("robot_active")
+    .array("robot_transform", {
+      type: "floatle",
+      length: 7
+    })
+    .array("robot_xyz_yaw", {
+      type: "floatle",
+      length: 4
+    })
+    // Actors 
+
+    
+    .uint8("actor1_active")
+    .array("actor1_transform", {
+      type: "floatle",
+      length: 7
+    })
+    .array("actor1_xyz_yaw", {
+      type: "floatle",
+      length: 4
+    })
+
+    .uint8("actor2_active")
+    .array("actor2_transform", {
+      type: "floatle",
+      length: 7
+    })
+    .array("actor2_xyz_yaw", {
+      type: "floatle",
+      length: 4
+    })
+
     .array("participant_xyz_yaw", {
       type: "floatle",
       length: 4
@@ -202,12 +234,49 @@ export class AppComponent implements OnInit {
       this.last_status = this.parseStatusV0.parse(arr);
 
 
-      if (this.renderer && this.scene && this.camera && this.circle) {
+      if (this.renderer && this.scene && this.camera && this.circle && this.circleR && this.circleA1 && this.circleA2) {
         this.circle.position.set(
           this.last_status.participant_xyz_yaw[0],
           this.last_status.participant_xyz_yaw[2],
           0);
         this.circle.setRotationFromAxisAngle(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-this.last_status.participant_xyz_yaw[3]-30));
+
+        if (this.last_status.robot_active == 1) {
+          this.circleR.position.set(
+            this.last_status.robot_xyz_yaw[0],
+            this.last_status.robot_xyz_yaw[2],
+            0);
+          this.circleR.setRotationFromAxisAngle(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-this.last_status.robot_xyz_yaw[3]-30));
+        } else {
+          this.circleR.position.set(
+            0, 30, 0
+          )
+        }
+
+        if (this.last_status.actor1_active == 1) {
+          this.circleA1.position.set(
+            this.last_status.actor1_xyz_yaw[0],
+            this.last_status.actor1_xyz_yaw[2],
+            0);
+          this.circleA1.setRotationFromAxisAngle(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-this.last_status.actor1_xyz_yaw[3]-30));
+        } else {
+          this.circleA1.position.set(
+            0, 30, 0
+          )
+        }
+
+        if (this.last_status.actor2_active == 1) {
+          this.circleA2.position.set(
+            this.last_status.actor2_xyz_yaw[0],
+            this.last_status.actor2_xyz_yaw[2],
+            0);
+          this.circleA2.setRotationFromAxisAngle(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-this.last_status.actor2_xyz_yaw[3]-30));
+        } else {
+          this.circleA2.position.set(
+            0, 30, 0
+          )
+        }
+
         this.renderer.render(this.scene, this.camera);
 
       }
@@ -227,6 +296,7 @@ export class AppComponent implements OnInit {
     const mBox = new THREE.MeshBasicMaterial({ color: "#a2ad9c" });
     const mUser = new THREE.MeshBasicMaterial({ color: "#e85325" });
     const mRobot = new THREE.MeshBasicMaterial({ color: "#0ee6e2" });
+    const mActor = new THREE.MeshBasicMaterial({ color: "#ff0000" });
 
 
    this.box = new THREE.Mesh(
@@ -244,17 +314,29 @@ export class AppComponent implements OnInit {
       mRobot
    );
 
-   this.scene.add(this.circle, this.circleR, this.box);
+   this.circleA1 = new THREE.Mesh(
+      new THREE.CircleGeometry( 0.15 , 3 ),
+      mActor
+   );
+
+   this.circleA2 = new THREE.Mesh(
+      new THREE.CircleGeometry( 0.15 , 3 ),
+      mActor
+   );
+
+   this.scene.add(this.circle, this.circleR, this.circleA1, this.circleA2, this.box);
    this.box.position.set(0, 1.5, -0.06);
    this.circle.position.set(0, 0, 0);
    this.circleR.position.set(0, 30, 0); // Not shown
+   this.circleA1.position.set(0, 30, 0); // Not shown
+   this.circleA2.position.set(0, 30, 0); // Not shown
 
   const canvasSizes = {
     width: 150,
     height: 200
    };
 
-  const orthoScale = 70;
+  const orthoScale = 40;
   this.camera = new THREE.OrthographicCamera(
     canvasSizes.width / - orthoScale,
     canvasSizes.width / orthoScale,
